@@ -2,114 +2,119 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>규빈오빠 전용 하드코어 라이브</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRIPCHAT - sodami01 (FAKE)</title>
     <style>
-        body { background: #050505; color: #fff; margin: 0; font-family: 'Apple SD Gothic Neo', sans-serif; overflow: hidden; }
-        .main-frame { display: flex; height: 100vh; }
+        :root { --main-red: #b32121; --bg-black: #1a1a1a; --chat-bg: #121212; --accent-gold: #ffcc00; }
+        body { background: var(--bg-black); color: white; margin: 0; font-family: sans-serif; overflow: hidden; }
         
-        /* 거울 모드 비디오 구역 */
-        .cam-section { flex: 7; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: contrast(1.1) brightness(1.1); }
-        
-        /* 오버레이 디자인 */
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .status-badge { position: absolute; top: 30px; left: 30px; background: #ff0000; color: white; padding: 4px 12px; border-radius: 2px; font-weight: 900; font-size: 1.2rem; box-shadow: 0 0 15px rgba(255,0,0,0.7); }
-        .viewer-box { position: absolute; top: 35px; left: 110px; font-size: 1.1rem; text-shadow: 2px 2px 4px #000; }
-        .watermark { position: absolute; bottom: 30px; right: 30px; opacity: 0.5; font-size: 1.5rem; font-style: italic; font-weight: bold; color: #ff00ff; }
+        /* 상단 헤더 */
+        header { background: var(--main-red); height: 50px; display: flex; align-items: center; padding: 0 15px; justify-content: space-between; }
+        .logo { font-weight: 900; font-size: 1.4rem; letter-spacing: -1px; display: flex; align-items: center; }
+        .logo span { background: white; color: var(--main-red); padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-size: 0.8rem; }
+        .join-btn { background: white; color: #333; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
 
-        /* 자극적인 채팅창 */
-        .chat-section { flex: 2; display: flex; flex-direction: column; background: #121212; border-left: 2px solid #222; min-width: 350px; }
-        .chat-title { padding: 20px; font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid #333; color: #ffcc00; }
-        #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+        /* 메인 컨테이너 */
+        .content { display: flex; flex-direction: column; height: calc(100vh - 50px); }
         
-        /* 메시지 개별 스타일 */
-        .msg { font-size: 0.95rem; border-radius: 5px; animation: slideIn 0.2s ease-out; word-break: break-all; }
-        .nick { font-weight: bold; color: #00d4ff; margin-right: 8px; }
-        .content { color: #e0e0e0; }
-        
-        /* 후원/강조 메시지 */
-        .super-chat { background: rgba(255, 0, 102, 0.2); border: 1px solid #ff0066; padding: 10px; margin: 5px 0; color: #ff0066; font-weight: bold; text-align: center; border-radius: 8px; box-shadow: inset 0 0 10px rgba(255,0,102,0.3); }
-        .super-chat span { display: block; font-size: 0.8rem; color: #ff99bb; }
+        /* 방송 화면 구역 */
+        .video-wrapper { position: relative; width: 100%; background: #000; aspect-ratio: 16 / 9; }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); } /* 거울 모드 */
+        .video-overlay { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; color: rgba(255,255,255,0.8); }
+        .toy-control { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
+        .toy-box { background: rgba(0,0,0,0.6); padding: 5px; border-radius: 5px; text-align: center; border: 1px solid #555; width: 50px; }
+        .toy-box div { font-size: 0.5rem; }
+        .toy-box span { color: var(--accent-gold); font-weight: bold; font-size: 0.7rem; }
 
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        /* 방송 정보 바 */
+        .stream-info { background: #222; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; }
+        .user-meta { display: flex; align-items: center; gap: 10px; }
+        .user-meta .heart { font-size: 1.2rem; }
+        .tip-btn { background: #60a830; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+        .show-btn { border: 2px solid var(--accent-gold); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+
+        /* 채팅 구역 */
+        .chat-area { flex: 1; background: var(--chat-bg); display: flex; flex-direction: column; overflow: hidden; }
+        #chat-msgs { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.9rem; }
+        .msg-item { margin-bottom: 8px; line-height: 1.4; }
+        .m-nick { font-weight: bold; margin-right: 5px; }
+        .m-vip { color: #ff4444; }
+        .m-mod { color: #ffcc00; }
+        .m-text { color: #ccc; }
+
+        /* 하단 입력창 */
+        .chat-input { padding: 10px; background: #222; display: flex; align-items: center; gap: 10px; }
+        .chat-input input { flex: 1; background: #333; border: none; padding: 10px; border-radius: 20px; color: white; outline: none; }
     </style>
 </head>
 <body>
 
-<div class="main-frame">
-    <div class="cam-section">
-        <video id="live-cam" autoplay playsinline></video>
-        <div class="overlay">
-            <div class="status-badge">LIVE</div>
-            <div class="viewer-box">🔥 <span id="view-count">48,291</span>명 시청 중</div>
-            <div class="watermark">VVIP-ONLY PRIVATE ROOM</div>
+<header>
+    <div class="logo">STRIP<span>CHAT</span></div>
+    <div class="join-btn">무료 가입</div>
+</header>
+
+<div class="content">
+    <div class="video-wrapper">
+        <video id="webcam" autoplay playsinline></video>
+        <div class="video-overlay">sodami01 (PRIVATE ROOM)</div>
+        <div class="toy-control">
+            <div class="toy-box"><div>Control</div><span>60s</span></div>
+            <div class="toy-box"><div>Tip</div><span>555</span></div>
         </div>
     </div>
 
-    <div class="chat-section">
-        <div class="chat-title">전용 프라이빗 룸 채팅</div>
-        <div id="chat-window"></div>
+    <div class="stream-info">
+        <div class="user-meta">
+            <span class="heart">🤍</span>
+            <span>644</span>
+        </div>
+        <div style="display: flex; gap: 5px;">
+            <div class="tip-btn">팁 🕹️</div>
+            <div class="show-btn">1:1 쇼 200 토큰 ▽</div>
+        </div>
+    </div>
+
+    <div class="chat-area">
+        <div id="chat-msgs"></div>
+        <div class="chat-input">
+            <input type="text" placeholder="공개 메시지...">
+            <span>😊</span>
+        </div>
     </div>
 </div>
 
 <script>
-    const video = document.getElementById('live-cam');
-    const chatWindow = document.getElementById('chat-window');
-    
-    // 캠 연결
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-            video.srcObject = stream;
-        }).catch(err => alert("캠을 켜야 니 그 한심한 얼굴을 보지, 허접 오빠! ♡"));
+    const video = document.getElementById('webcam');
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
     }
 
-    // 자극적인 닉네임과 멘트들 (규빈 오빠 수준에 맞춤 ♡)
-    const nicks = ["발정난늑대", "한번만더보여줘", "풀코인", "방장미쳤다", "눈나나죽어", "VIP사자", "변태사냥꾼", "새벽2시", "도파민중독자", "현금술사"];
-    const quotes = [
-        "와.. 몸매 실화냐? 지렸다 진짜",
-        "방금 그거 뭐야? 아래 더 내려봐",
-        "지금 당장 별사탕 1000개 쏜다, 더 화끈하게 가자",
-        "채팅 속도 봐 ㅋㅋㅋ 다들 환장했네",
-        "아 진짜 숨막힌다.. 규빈이 오늘 작정했네?",
-        "더 자극적으로 가줘, 현기증 나니까",
-        "방금 그 표정 대박.. 한 번 더 해주면 안 돼?",
-        "와 씨.. 이건 무조건 녹화각이다",
-        "형님들 화력 지원 좀!! 다음 단계 보고 싶어!!",
-        "하.. 진짜 미치겠네, 밤새도록 달린다 오늘"
+    const chat = document.getElementById('chat-msgs');
+    const users = [
+        {n: "-DukeMidnight-", c: "m-vip"},
+        {n: "weekendgd", c: "m-mod"},
+        {n: "Sexybodymaaan", c: "m-text"},
+        {n: "규빈오빠는허접", c: "m-text"},
+        {n: "토큰털이범", c: "m-vip"}
+    ];
+    const lines = [
+        "잉", "목표달성 하면서", "빨리해 ㅋ", "피하고 똥이 벤당하고 오랫동안",
+        "와 오늘 의상 미쳤다 진짜", "토큰 더 쏘면 뭐해줄건데?", "다음 단계 가자", "하아아아 너무 좋다"
     ];
 
-    function spawnChat() {
-        const isDonation = Math.random() > 0.85;
-        const msgDiv = document.createElement('div');
-        
-        if (isDonation) {
-            msgDiv.className = 'super-chat';
-            const amount = (Math.floor(Math.random() * 50) + 1) * 100;
-            msgDiv.innerHTML = `💎 <strong>${nicks[Math.floor(Math.random()*nicks.length)]}</strong>님이 별사탕 ${amount}개 후원! <span>"이거 먹고 더 야한 거 보여줘! 빨리!!"</span>`;
-        } else {
-            msgDiv.className = 'msg';
-            const n = nicks[Math.floor(Math.random()*nicks.length)];
-            const q = quotes[Math.floor(Math.random()*quotes.length)];
-            msgDiv.innerHTML = `<span class="nick">${n}:</span><span class="content">${q}</span>`;
-        }
-
-        chatWindow.appendChild(msgDiv);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-
-        if (chatWindow.childNodes.length > 40) chatWindow.removeChild(chatWindow.firstChild);
-        
-        // 규빈 오빠 정신 못 차리게 채팅 속도 조절 ♡
-        setTimeout(spawnChat, Math.random() * 800 + 200);
+    function addChat() {
+        const u = users[Math.floor(Math.random()*users.length)];
+        const l = lines[Math.floor(Math.random()*lines.length)];
+        const div = document.createElement('div');
+        div.className = 'msg-item';
+        div.innerHTML = `<span class="m-nick ${u.c}">★ ${u.n}</span> <span class="m-text">${l}</span>`;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+        if(chat.childNodes.length > 30) chat.removeChild(chat.firstChild);
+        setTimeout(addChat, Math.random() * 1500 + 500);
     }
-
-    // 시청자 수 조작 (규빈 오빠 기분 좋아지라고 ♡)
-    setInterval(() => {
-        const vc = document.getElementById('view-count');
-        let current = parseInt(vc.innerText.replace(',', ''));
-        vc.innerText = (current + Math.floor(Math.random() * 100 - 45)).toLocaleString();
-    }, 2000);
-
-    spawnChat();
+    addChat();
 </script>
 
 </body>
