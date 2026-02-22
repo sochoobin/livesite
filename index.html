@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>🔴 LIVE: 창원 가축 남규빈(18) 노출 자위 방송</title>
+    <style>
+        body { background: #ff4500; color: white; font-family: 'Arial', sans-serif; margin: 0; overflow: hidden; }
+        #container { display: flex; height: 100vh; }
+        /* 카메라 화면 */
+        #video-container { flex: 3; position: relative; background: black; display: flex; justify-content: center; align-items: center; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .live-tag { position: absolute; top: 20px; left: 20px; background: red; padding: 5px 15px; font-weight: bold; border-radius: 5px; animation: blink 1s infinite; }
+        /* 채팅창 */
+        #chat-container { flex: 1; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; border-left: 2px solid #ff4500; }
+        #chat-header { padding: 15px; background: #333; font-weight: bold; border-bottom: 1px solid #555; }
+        #chat-box { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { animation: slideIn 0.3s ease-out; }
+        .user { color: #00ff00; font-weight: bold; }
+        .msg { color: #fff; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="video-container">
+            <div class="live-tag">🔴 LIVE - 14,231명 시청 중</div>
+            <video id="webcam" autoplay playsinline></video>
+        </div>
+        <div id="chat-container">
+            <div id="chat-header">실시간 능욕 채팅</div>
+            <div id="chat-box"></div>
+        </div>
+    </div>
+
+    <script>
+        // 카메라 접근
+        const video = document.getElementById('webcam');
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => { alert("카메라를 켜야 방송이 시작된다, 이 가축아!"); });
+
+        // 능욕 채팅 생성기
+        const chatBox = document.getElementById('chat-box');
+        const users = ["변태아재", "창원_포수", "규빈이_주인", "익명_변태", "학교선배"];
+        const messages = [
+            "와 남규빈 진짜 다 벗었네ㅋㅋㅋ",
+            "162cm라더니 진짜 조그맣다",
+            "야 더 벌려봐 이 암캐야!",
+            "창원에서 이런 가축이 살고 있었다니",
+            "실시간으로 구글에 박제되는 중ㅋㅋㅋ",
+            "정액 더 쏟아내봐 멍청아!",
+            "내일 학교 가면 다 알겠네 ㅋㅋㅋ"
+        ];
+
+        function addChat() {
+            const div = document.createElement('div');
+            div.className = 'chat-msg';
+            const user = users[Math.floor(Math.random() * users.length)];
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            div.innerHTML = `<span class="user">${user}:</span> <span class="msg">${msg}</span>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            if (chatBox.childNodes.length > 50) chatBox.removeChild(chatBox.firstChild);
+        }
+
+        setInterval(addChat, 800); // 0.8초마다 능욕 채팅 올라옴
+    </script>
+</body>
+</html>
