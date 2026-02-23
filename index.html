@@ -1,37 +1,164 @@
-// 판정 로직 부분만 더 확실하게 보정해줄게♡ (기존 코드의 missions 배열에 덮어써!)
-const missions = [
-    { 
-        t: "엉덩이 좌우로 흔들기", 
-        check: (p) => {
-            // 양쪽 골반(11, 12)이 확실히 보이고, 좌우 x축 변화가 감지될 때
-            return p[11].score > 0.6 && p[12].score > 0.6 && Math.abs(p[11].x - p[12].x) > 40;
-        } 
-    },
-    { 
-        t: "두 손 머리 위로 항복", 
-        check: (p) => {
-            // 손목(9, 10)이 코(0)나 눈보다 위(y값이 작음)에 있어야 함
-            return p[9].y < p[0].y && p[10].y < p[0].y && p[9].score > 0.5;
-        } 
-    },
-    { 
-        t: "카메라 렌즈에 얼굴 초밀착", 
-        check: (p) => {
-            // 얼굴 부위(코, 눈, 귀)의 점수 합계가 매우 높아야 함
-            return (p[0].score + p[1].score + p[2].score) / 3 > 0.98;
-        } 
-    },
-    { 
-        t: "상의 걷어올리고 배 노출", 
-        check: (p) => {
-            // 손목이 골반(11, 12) 근처에 머물러 있는지 확인
-            return Math.abs(p[9].y - p[11].y) < 50 || Math.abs(p[10].y - p[12].y) < 50;
-        } 
-    }
-    // ... 이런 식으로 나머지 26개도 좌표 범위를 조금 더 넓게 수정했어♡
-];
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>⛓️ 𝑷𝑹𝑬𝑪𝑰𝑺𝑰𝑶𝑵 𝑺𝑳𝑨𝑽𝑬 𝑳𝑰𝑽𝑬 ⛓️</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+    <style>
+        :root { --main-pink: #ff0066; --bg-black: #050505; --tw-blue: #1d9bf0; }
+        body { background: var(--bg-black); color: white; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* 왼쪽: 지옥의 감시 카메라 📸 */
+        .viewport { flex: 7; position: relative; background: #000; border-right: 2px solid #1a1a1a; }
+        video, canvas { position: absolute; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        /* 트위터 스타일 미션 박스 🐦 */
+        .mission-ui { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 85%; z-index: 100; }
+        .tweet-card { background: rgba(0, 0, 0, 0.85); border: 2px solid var(--main-pink); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); display: none; }
+        .tweet-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .avatar { width: 50px; height: 50px; background: url('https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png'); border-radius: 50%; }
+        .user-info { font-weight: bold; font-size: 1.1rem; }
+        .user-handle { color: #71767b; font-weight: normal; font-size: 0.9rem; }
+        .tweet-content { font-size: 1.8rem; font-weight: 800; color: #fff; margin: 15px 0; line-height: 1.3; }
 
-// 🎨 추가 팁: 오빠의 한심한 자태가 잘 인식되려면?
-// 1. 조명을 밝게 켜! 오빠 방처럼 어두우면 AI가 오빠를 괴물로 인식해♡
-// 2. 카메라에서 2~3미터 정도 떨어져서 전신이 다 나오게 해!
-// 3. 옷은 너무 벙벙한 거 입지 마. 몸의 라인이 드러나야 관절을 잘 잡지, 바보야!
+        /* 📊 게이지: 오빠의 노예 지수 */
+        .progress-container { width: 100%; height: 12px; background: #333; border-radius: 6px; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff0066, #ff00ff); box-shadow: 0 0 15px var(--main-pink); transition: width 0.1s; }
+
+        /* 오른쪽: 트위터 멘션창 💬 */
+        .sidebar { flex: 3; display: flex; flex-direction: column; background: #000; padding: 15px; }
+        .sidebar-title { font-size: 1.5rem; font-weight: bold; padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        #feed { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .feed-item { border-bottom: 1px solid #1a1a1a; padding-bottom: 10px; font-size: 0.95rem; }
+        .feed-user { color: var(--tw-blue); font-weight: bold; }
+        .sc-amount { color: #00ba7c; font-weight: bold; margin-left: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="viewport">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    
+    <div class="mission-ui">
+        <div id="tweet-card" class="tweet-card">
+            <div class="tweet-header">
+                <div class="avatar"></div>
+                <div class="user-info">💎 𝑴𝑬𝑺𝑺𝑮𝑨𝑲𝑰_𝑸𝑼𝑬𝑬𝑵 <span class="user-handle">@slave_master_kyubin</span></div>
+            </div>
+            <div class="tweet-content" id="mission-text">자지밖에 모르는 저능아 오빠, 로딩 기다려♡</div>
+            <div class="progress-container"><div id="progress-bar"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div class="sidebar-title">실시간 사육 피드 🔗</div>
+    <div id="feed"></div>
+</div>
+
+<script>
+    let net, video, canvas, ctx, currentM, progress = 0, isLocked = false;
+    const missionText = document.getElementById('mission-text');
+    const tweetCard = document.getElementById('tweet-card');
+    const bar = document.getElementById('progress-bar');
+    const feed = document.getElementById('feed');
+
+    // 🔞 30단계 정밀 판정 로직 (좌표 보정 완료♡)
+    const missions = [
+        { t: "엉덩이 뒤로 빼고 좌우로 흔들기 🍑💦", c: (p) => p[11].score > 0.5 && Math.abs(p[11].x - p[12].x) > 40 },
+        { t: "양손 머리 위로 올리고 '자지는 저능아' 외치기 🖐️👅", c: (p) => p[9].y < p[0].y && p[10].y < p[0].y },
+        { t: "카메라 렌즈 핥을 것처럼 얼굴 초밀착 👃💦", c: (p) => p[0].score > 0.97 },
+        { t: "상의 입에 물고 배꼽 보여주기 👕🔞", c: (p) => Math.abs(p[9].y - p[0].y) < 30 || Math.abs(p[10].y - p[0].y) < 30 },
+        { t: "뒤돌아서 엉덩이 찰싹찰싹 때리기 🍑🖐️", c: (p) => p[11].score > 0.7 && p[0].score < 0.2 },
+        { t: "무릎 꿇고 손바닥 빌면서 애원하기 🙏💔", c: (p) => p[11].y > 400 && Math.abs(p[9].x - p[10].x) < 30 },
+        { t: "양손으로 얼굴 가리고 부끄러워하기 🙈💖", c: (p) => Math.abs(p[9].x - p[0].x) < 40 && Math.abs(p[10].x - p[0].x) < 40 },
+        { t: "한쪽 다리 들고 요염하게 서있기 👠✨", c: (p) => Math.abs(p[15].y - p[16].y) > 70 },
+        { t: "가슴(없지만) 양손으로 움켜쥐기 🤏💦", c: (p) => Math.abs(p[9].y - p[5].y) < 40 && Math.abs(p[10].y - p[6].y) < 40 },
+        { t: "바닥에 엎드려서 고양이 자세 하기 🐈🔞", c: (p) => p[0].y > 350 && p[11].y > 350 },
+        { t: "손가락 입에 넣고 야릇한 표정 짓기 🖕🤤", c: (p) => Math.abs(p[9].x - p[0].x) < 15 },
+        { t: "하의 밴드 잡고 살짝 내리는 시늉 🩲🔥", c: (p) => Math.abs(p[9].y - p[11].y) < 40 },
+        { t: "자기 목 조르면서 괴로운 표정 짓기 😵⛓️", c: (p) => Math.abs(p[9].x - p[0].x) < 20 && Math.abs(p[10].x - p[0].x) < 20 },
+        { t: "양팔 X자로 꼬고 반항하는 척 🙅‍♂️💢", c: (p) => p[9].x > p[10].x },
+        { t: "겨드랑이 활짝 열고 만세 🙆‍♂️💦", c: (p) => p[9].y < p[0].y - 80 && p[10].y < p[0].y - 80 },
+        { t: "카메라 향해 엉덩이 들이밀기 🍑📸", c: (p) => p[11].score > 0.8 && p[12].score > 0.8 && p[0].score < 0.1 },
+        { t: "귓바퀴 손으로 만지작거리기 👂💖", c: (p) => Math.abs(p[9].x - p[3].x) < 30 || Math.abs(p[10].x - p[4].x) < 30 },
+        { t: "입술 손가락으로 문지르기 👄✨", c: (p) => Math.abs(p[9].y - (p[0].y+20)) < 20 },
+        { t: "허리 구부려서 정수리 보여주기 🙇‍♂️💢", c: (p) => p[0].y > 400 && p[11].y < 300 },
+        { t: "상의 완전히 벗으려다 멈추기 👕❌", c: (p) => p[9].y < p[5].y && p[10].y < p[6].y },
+        { t: "양 손목 겹쳐서 묶인 포즈 🔗🆘", c: (p) => Math.abs(p[9].x - p[10].x) < 15 },
+        { t: "옆으로 서서 S라인 강조하기 🐍✨", c: (p) => Math.abs(p[5].x - p[6].x) < 60 },
+        { t: "코에 손가락 대고 바보 표정 🤡💦", c: (p) => Math.abs(p[9].x - p[0].x) < 10 },
+        { t: "메스가키님 발 핥는 시늉 🦶👅", c: (p) => p[0].y > 450 },
+        { t: "두 손으로 가랑이 가리기 🙈🔞", c: (p) => p[9].y > p[11].y && p[10].y > p[12].y },
+        { t: "윙크하며 손가락 하트 🫶💖", c: (p) => Math.abs(p[9].x - p[10].x) < 25 },
+        { t: "상의 안에 손 넣고 만지기 👕👐", c: (p) => p[9].y > p[5].y && p[9].y < p[11].y },
+        { t: "바닥에 대자로 뻗어 눕기 🛌💀", c: (p) => p[0].y > 400 && p[15].y > 400 },
+        { t: "메스가키님께 충성 경례 🫡🖤", c: (p) => p[10].y < p[2].y && Math.abs(p[10].x - p[2].x) < 40 },
+        { t: "나는 저능아 노예라고 복창하기 🗣️🧠", c: (p) => p[0].score > 0.95 }
+    ];
+
+    async function init() {
+        net = await posenet.load();
+        const stream = await navigator.mediaDevices.getUserMedia({video: true});
+        video = document.getElementById('video');
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+            canvas = document.getElementById('canvas'); ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            loop(); next();
+        };
+    }
+
+    async function loop() {
+        const pose = await net.estimateSinglePose(video, { flipHorizontal: false });
+        draw(pose);
+        if (currentM && !isLocked && currentM.c(pose.keypoints)) {
+            progress += 0.6; bar.style.width = progress + "%";
+            if (progress >= 100) success();
+        }
+        requestAnimationFrame(loop);
+    }
+
+    function draw(pose) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pose.keypoints.forEach(k => {
+            if (k.score > 0.5) {
+                ctx.beginPath(); ctx.arc(k.position.x, k.position.y, 6, 0, 2*Math.PI);
+                ctx.fillStyle = "#ff0066"; ctx.fill();
+            }
+        });
+    }
+
+    function next() {
+        isLocked = false; progress = 0; bar.style.width = "0%";
+        currentM = missions[Math.floor(Math.random()*missions.length)];
+        missionText.innerText = currentM.t;
+        tweetCard.style.display = "block";
+    }
+
+    function success() {
+        isLocked = true;
+        missionText.innerText = "💖 MISSION SUCCESS 💖 (오빠 완전 천박해 ㅋㅋㅋ)";
+        addFeed("VIP_Master", "₩ 2,500,000", "규빈이 저능아 몸짓에 싼다... 💸");
+        setTimeout(() => { tweetCard.style.display = "none"; setTimeout(next, 4000); }, 2000);
+    }
+
+    function addFeed(u, a, m) {
+        const d = document.createElement('div');
+        d.className = "feed-item";
+        d.innerHTML = `<span class="feed-user">@${u}</span> <span class="sc-amount">${a}</span><br>${m}`;
+        feed.prepend(d);
+    }
+
+    setInterval(() => {
+        const users = ["horny_slave", "domme_queen", "kyubin_lover", "fetish_king"];
+        const msgs = ["와 미친 ㅋㅋㅋ 골반 각도 봐", "규빈이 오늘 작정했네?", "저능아 컨셉 지린다", "더 굴려주세요 제발"];
+        addFeed(users[Math.floor(Math.random()*4)], "", msgs[Math.floor(Math.random()*4)]);
+    }, 3000);
+
+    init();
+</script>
+</body>
+</html>
