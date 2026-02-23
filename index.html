@@ -2,119 +2,137 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STRIPCHAT - sodami01 (FAKE)</title>
+    <title>STRIPCHAT - PC WIDE MODE</title>
     <style>
-        :root { --main-red: #b32121; --bg-black: #1a1a1a; --chat-bg: #121212; --accent-gold: #ffcc00; }
-        body { background: var(--bg-black); color: white; margin: 0; font-family: sans-serif; overflow: hidden; }
+        :root { --main-red: #b32121; --bg-dark: #0a0a0a; --panel-bg: #1a1a1a; --accent: #ffcc00; }
+        body { background: var(--bg-dark); color: white; margin: 0; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; }
         
-        /* 상단 헤더 */
-        header { background: var(--main-red); height: 50px; display: flex; align-items: center; padding: 0 15px; justify-content: space-between; }
-        .logo { font-weight: 900; font-size: 1.4rem; letter-spacing: -1px; display: flex; align-items: center; }
-        .logo span { background: white; color: var(--main-red); padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-size: 0.8rem; }
-        .join-btn { background: white; color: #333; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        /* 상단 네비게이션 */
+        nav { background: var(--main-red); height: 60px; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .logo { font-size: 1.8rem; font-weight: 900; letter-spacing: -1.5px; }
+        .logo span { background: white; color: var(--main-red); padding: 2px 8px; border-radius: 4px; margin-left: 5px; font-size: 1rem; }
+        .nav-right { display: flex; gap: 20px; align-items: center; }
+        .login-btn { color: white; text-decoration: none; font-weight: bold; }
+        .join-btn { background: #fff; color: var(--main-red); padding: 8px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
 
-        /* 메인 컨테이너 */
-        .content { display: flex; flex-direction: column; height: calc(100vh - 50px); }
+        /* 메인 레이아웃 */
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* 왼쪽: 방송 구역 (와이드) */
+        .video-side { flex: 3.5; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
+        video { width: 100%; height: 100%; object-fit: contain; transform: scaleX(-1); } /* 거울 모드 적용 */
         
-        /* 방송 화면 구역 */
-        .video-wrapper { position: relative; width: 100%; background: #000; aspect-ratio: 16 / 9; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); } /* 거울 모드 */
-        .video-overlay { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; color: rgba(255,255,255,0.8); }
-        .toy-control { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
-        .toy-box { background: rgba(0,0,0,0.6); padding: 5px; border-radius: 5px; text-align: center; border: 1px solid #555; width: 50px; }
-        .toy-box div { font-size: 0.5rem; }
-        .toy-box span { color: var(--accent-gold); font-weight: bold; font-size: 0.7rem; }
+        /* 방송 위 오버레이 */
+        .live-info { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; }
+        .badge { background: rgba(255,0,0,0.8); padding: 5px 12px; border-radius: 3px; font-weight: bold; }
+        .viewers { background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 3px; }
+        .cam-name { position: absolute; bottom: 20px; left: 20px; font-size: 1.5rem; font-weight: bold; text-shadow: 2px 2px 5px #000; color: var(--accent); }
 
-        /* 방송 정보 바 */
-        .stream-info { background: #222; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; }
-        .user-meta { display: flex; align-items: center; gap: 10px; }
-        .user-meta .heart { font-size: 1.2rem; }
-        .tip-btn { background: #60a830; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
-        .show-btn { border: 2px solid var(--accent-gold); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+        /* 오른쪽: 채팅 및 컨트롤 */
+        .side-panel { flex: 1; background: var(--panel-bg); display: flex; flex-direction: column; border-left: 1px solid #333; min-width: 400px; }
+        .panel-header { padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-around; font-weight: bold; color: #888; }
+        .panel-header span.active { color: #fff; border-bottom: 2px solid var(--main-red); padding-bottom: 5px; }
+        
+        #chat-content { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.95rem; background: #121212; }
+        .chat-line { margin-bottom: 10px; line-height: 1.5; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .c-vip { color: #ff5555; font-weight: bold; }
+        .c-mod { color: #55ff55; font-weight: bold; }
+        .c-name { color: #00ccff; font-weight: bold; margin-right: 10px; }
+        .c-msg { color: #eee; }
 
-        /* 채팅 구역 */
-        .chat-area { flex: 1; background: var(--chat-bg); display: flex; flex-direction: column; overflow: hidden; }
-        #chat-msgs { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.9rem; }
-        .msg-item { margin-bottom: 8px; line-height: 1.4; }
-        .m-nick { font-weight: bold; margin-right: 5px; }
-        .m-vip { color: #ff4444; }
-        .m-mod { color: #ffcc00; }
-        .m-text { color: #ccc; }
-
-        /* 하단 입력창 */
-        .chat-input { padding: 10px; background: #222; display: flex; align-items: center; gap: 10px; }
-        .chat-input input { flex: 1; background: #333; border: none; padding: 10px; border-radius: 20px; color: white; outline: none; }
+        /* 하단 컨트롤 */
+        .panel-footer { padding: 15px; background: #222; }
+        .tip-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+        .tip-btn { background: #444; border: 1px solid #555; padding: 10px; text-align: center; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .tip-btn:hover { background: #60a830; border-color: #70c040; }
+        .chat-input { background: #333; border: none; width: 100%; padding: 12px; border-radius: 5px; color: white; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<header>
+<nav>
     <div class="logo">STRIP<span>CHAT</span></div>
-    <div class="join-btn">무료 가입</div>
-</header>
+    <div class="nav-right">
+        <a href="#" class="login-btn">로그인</a>
+        <div class="join-btn">무료 가입</div>
+    </div>
+</nav>
 
-<div class="content">
-    <div class="video-wrapper">
-        <video id="webcam" autoplay playsinline></video>
-        <div class="video-overlay">sodami01 (PRIVATE ROOM)</div>
-        <div class="toy-control">
-            <div class="toy-box"><div>Control</div><span>60s</span></div>
-            <div class="toy-box"><div>Tip</div><span>555</span></div>
+<div class="main-container">
+    <div class="video-side">
+        <video id="pc-cam" autoplay playsinline></video>
+        <div class="live-info">
+            <div class="badge">LIVE</div>
+            <div class="viewers">👁️ <span id="v-count">128,492</span></div>
         </div>
+        <div class="cam-name">sodami01's PRIVATE LOUNGE</div>
     </div>
 
-    <div class="stream-info">
-        <div class="user-meta">
-            <span class="heart">🤍</span>
-            <span>644</span>
+    <div class="side-panel">
+        <div class="panel-header">
+            <span class="active">공개 채팅</span>
+            <span>사용자 (842)</span>
+            <span>설정</span>
         </div>
-        <div style="display: flex; gap: 5px;">
-            <div class="tip-btn">팁 🕹️</div>
-            <div class="show-btn">1:1 쇼 200 토큰 ▽</div>
-        </div>
-    </div>
+        
+        <div id="chat-content"></div>
 
-    <div class="chat-area">
-        <div id="chat-msgs"></div>
-        <div class="chat-input">
-            <input type="text" placeholder="공개 메시지...">
-            <span>😊</span>
+        <div class="panel-footer">
+            <div class="tip-options">
+                <div class="tip-btn">💎 25</div>
+                <div class="tip-btn">💎 100</div>
+                <div class="tip-btn">💎 500</div>
+            </div>
+            <input type="text" class="chat-input" placeholder="메시지를 입력하세요...">
         </div>
     </div>
 </div>
 
 <script>
-    const video = document.getElementById('webcam');
+    const video = document.getElementById('pc-cam');
     if (navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
     }
 
-    const chat = document.getElementById('chat-msgs');
+    const chat = document.getElementById('chat-content');
     const users = [
-        {n: "-DukeMidnight-", c: "m-vip"},
-        {n: "weekendgd", c: "m-mod"},
-        {n: "Sexybodymaaan", c: "m-text"},
-        {n: "규빈오빠는허접", c: "m-text"},
-        {n: "토큰털이범", c: "m-vip"}
+        {n: "VVIP_Master", c: "c-vip"},
+        {n: "쾌락주의자", c: "c-name"},
+        {n: "오빠가간다", c: "c-name"},
+        {n: "매니저_S", c: "c-mod"},
+        {n: "규빈_Private", c: "c-vip"}
     ];
-    const lines = [
-        "잉", "목표달성 하면서", "빨리해 ㅋ", "피하고 똥이 벤당하고 오랫동안",
-        "와 오늘 의상 미쳤다 진짜", "토큰 더 쏘면 뭐해줄건데?", "다음 단계 가자", "하아아아 너무 좋다"
+    const msgs = [
+        "와.. 큰 화면으로 보니까 더 대박이다",
+        "방장님 지금 당장 목표달성 가시죠",
+        "하아.. 오늘 잠은 다 잤네 진짜",
+        "채팅창 화력 미쳤냐고 ㅋㅋㅋ",
+        "별사탕 1000개 갑니다! 리액션 고!",
+        "지금 이거 나만 보고 있는 거 아니지?",
+        "더 야하게 가줘요, 현기증 나니까",
+        "와 씨... 진짜 숨멎겠다",
+        "형님들 다들 장전 됐습니까?? 쏘세요!!"
     ];
 
     function addChat() {
         const u = users[Math.floor(Math.random()*users.length)];
-        const l = lines[Math.floor(Math.random()*lines.length)];
+        const m = msgs[Math.floor(Math.random()*msgs.length)];
         const div = document.createElement('div');
-        div.className = 'msg-item';
-        div.innerHTML = `<span class="m-nick ${u.c}">★ ${u.n}</span> <span class="m-text">${l}</span>`;
+        div.className = 'chat-line';
+        div.innerHTML = `<span class="${u.c}">${u.n}:</span> <span class="c-msg">${m}</span>`;
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
-        if(chat.childNodes.length > 30) chat.removeChild(chat.firstChild);
-        setTimeout(addChat, Math.random() * 1500 + 500);
+        if(chat.childNodes.length > 50) chat.removeChild(chat.firstChild);
+        setTimeout(addChat, Math.random() * 1000 + 300);
     }
     addChat();
+
+    // 시청자 수 카운트 조작
+    setInterval(() => {
+        const vc = document.getElementById('v-count');
+        let val = parseInt(vc.innerText.replace(',', ''));
+        vc.innerText = (val + Math.floor(Math.random()*50 - 20)).toLocaleString();
+    }, 3000);
 </script>
 
 </body>
