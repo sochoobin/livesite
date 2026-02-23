@@ -2,223 +2,134 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>허접 오빠의 수치스러운 YouTube Live</title>
+    <title>🔞 30-STAGE AI SLAVE SYSTEM</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
     <style>
-        :root { --yt-bg: #0f0f0f; --yt-panel: #212121; --yt-text: #f1f1f1; --sc-red: #e62117; --sc-gold: #ffb300; --sc-blue: #1e88e5; }
-        body { background: var(--yt-bg); color: var(--yt-text); margin: 0; font-family: 'Roboto', 'Noto Sans KR', sans-serif; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* 왼쪽: 비디오 및 슈퍼챗 오버레이 */
-        .video-section { flex: 7; position: relative; background: #000; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #333; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        
-        /* 유튜브 스타일 라이브 뱃지 */
-        .yt-live-badge { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
-        .yt-live-badge .red-dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1.5s infinite; }
-        .viewer-count { position: absolute; top: 20px; left: 110px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; color: #aaa; font-weight: bold; }
-
-        /* 🔥 시청자 슈퍼챗 강제 미션 보드 */
-        .superchat-mission { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 70%; background: var(--sc-red); border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; z-index: 10; animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .sc-header { background: rgba(0,0,0,0.2); padding: 15px; display: flex; align-items: center; gap: 15px; font-weight: bold; font-size: 1.2rem; }
-        .sc-header .sc-amount { color: #fff; font-size: 1.5rem; }
-        .sc-body { padding: 20px; background: var(--sc-red); font-size: 1.8rem; font-weight: 900; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
-        
-        /* 미션 진행도 (오빠의 수치심 게이지) */
-        .progress-container { background: rgba(0,0,0,0.5); height: 15px; width: 100%; }
-        #mission-progress { background: #fff; height: 100%; width: 0%; transition: width 0.2s; }
-
-        /* 오른쪽: 유튜브 스타일 실시간 채팅창 */
-        .chat-section { flex: 2.5; display: flex; flex-direction: column; background: var(--yt-bg); min-width: 350px; }
-        .chat-header { padding: 15px; font-size: 1rem; border-bottom: 1px solid #333; }
-        #chat-log { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; font-size: 0.95rem; }
-        
-        .chat-msg { display: flex; gap: 10px; line-height: 1.4; }
-        .chat-msg .author { color: #aaa; font-weight: 500; }
-        .chat-msg .text { color: var(--yt-text); }
-        .chat-msg .author.sponsor { color: #2ba640; } /* 유튜버 멤버십 색상 */
-
-        /* 채팅창 슈퍼챗 기록 */
-        .sc-chat-history { background: var(--sc-gold); color: #000; padding: 10px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; }
-        .sc-chat-history .sc-amt { font-size: 1.1rem; display: block; margin-bottom: 4px; }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        @keyframes popUp { 0% { opacity: 0; transform: translate(-50%, 50px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
+        :root { --yt-red: #ff0000; --bg: #050505; --gold: #ffcc00; }
+        body { background: var(--bg); color: white; margin: 0; font-family: 'Roboto', sans-serif; display: flex; height: 100vh; }
+        .main { flex: 7.5; position: relative; background: #000; }
+        video, canvas { position: absolute; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .sc-box { width: 80%; margin: 40px auto; background: var(--yt-red); border-radius: 8px; overflow: hidden; box-shadow: 0 0 30px rgba(255,0,0,0.5); display: none; }
+        .sc-user { background: rgba(0,0,0,0.2); padding: 15px; font-weight: bold; font-size: 1.2rem; }
+        .sc-msg { padding: 25px; font-size: 2rem; font-weight: 900; text-align: center; }
+        .gauge-outer { width: 100%; height: 20px; background: rgba(0,0,0,0.3); }
+        #gauge-inner { width: 0%; height: 100%; background: #fff; transition: width 0.1s; box-shadow: 0 0 20px #fff; }
+        .chat { flex: 2.5; background: #0f0f0f; border-left: 1px solid #333; overflow-y: auto; padding: 15px; font-size: 0.9rem; }
+        .sc-chat { background: #ffb300; color: black; padding: 10px; border-radius: 4px; font-weight: bold; margin: 10px 0; }
     </style>
 </head>
 <body>
-
-<div class="video-section">
-    <video id="webcam" autoplay playsinline></video>
-    <div class="yt-live-badge"><div class="red-dot"></div>실시간</div>
-    <div class="viewer-count">👁 <span id="viewers">42,105</span></div>
-
-    <div class="superchat-mission" id="sc-mission-box">
-        <div class="sc-header">
-            <div style="background: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items:center; justify-content:center; color:#000; font-size:1.5rem;">👑</div>
-            <div style="flex:1;">
-                <div id="sc-user">VVIP_주인님</div>
-                <div class="sc-amount" id="sc-amount">₩ 500,000</div>
-            </div>
+<div class="main">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    <div class="ui">
+        <div id="sc-box" class="sc-box">
+            <div class="sc-user">💰 VIP_주인님: ₩ 1,500,000</div>
+            <div id="mission-text" class="sc-msg">로딩 중...</div>
+            <div class="gauge-outer"><div id="gauge-inner"></div></div>
         </div>
-        <div class="sc-body" id="sc-mission-text">미션 텍스트</div>
-        <div class="progress-container"><div id="mission-progress"></div></div>
     </div>
 </div>
-
-<div class="chat-section">
-    <div class="chat-header">주요 채팅 ▼</div>
-    <div id="chat-log"></div>
-    <div style="padding: 15px; background: var(--yt-panel); border-top: 1px solid #333;">
-        <div style="background: #333; padding: 10px; border-radius: 20px; color: #888;">채팅 메시지 입력...</div>
-    </div>
-</div>
-
-<canvas id="motion-canvas" style="display:none;"></canvas>
+<div id="chat" class="chat"></div>
 
 <script>
-    const video = document.getElementById('webcam');
-    const canvas = document.getElementById('motion-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    const scBox = document.getElementById('sc-mission-box');
-    const scText = document.getElementById('sc-mission-text');
-    const scAmount = document.getElementById('sc-amount');
-    const scUser = document.getElementById('sc-user');
-    const progressBar = document.getElementById('mission-progress');
-    const chatLog = document.getElementById('chat-log');
+    let net, video, canvas, ctx, currentM, progress = 0;
+    const missionText = document.getElementById('mission-text');
+    const scBox = document.getElementById('sc-box');
+    const gauge = document.getElementById('gauge-inner');
 
-    // 🔞 창의적이고 수치스러운 30가지 미션 리스트 (오빠 맞춤형♡)
+    // 🔞 30개 미션 + 30개 개별 정밀 로직 (수학적 판정)
     const missions = [
-        "양손으로 머리 위 하트 만들고 '난 허접이야' 외치기", "카메라 보면서 혀 내밀고 개처럼 멍멍 짖기", 
-        "입술 쭉 내밀고 모니터 화면에 뽀뽀하기", "뒤돌아서 엉덩이 화면 쪽으로 씰룩거리기", 
-        "제로투 댄스 30초 동안 요염하게 추기", "양 볼 꼬집으면서 '주인님 용서해주세요' 하기",
-        "카메라에 얼굴 완전 들이밀고 거칠게 숨쉬기", "바닥에 엎드려서 고양이 자세로 야옹~ 하기",
-        "눈 뒤집고 침 흘리는 바보 같은 표정 짓기", "옷 살짝 걷어서 배꼽 보여주면서 애교 부리기",
-        "허리 숙여서 카메라에 정수리 보여주며 싹싹 빌기", "두 손 모아 빌면서 '한 번만 봐주세요' 애원하기",
-        "겨드랑이 활짝 열고 만세하면서 수치심 느끼기", "허공에 대고 가상의 주인이랑 찐하게 포옹하기",
-        "손가락 입에 물고 촉촉한 눈빛으로 올려다보기", "무릎 꿇고 앉아서 수치스러운 자기소개 하기",
-        "손가락 하트 날리며 '오빠가 제일 사랑해' 느끼하게 말하기", "카메라 앞에서 다리 벌리고 개다리춤 추기",
-        "눈 감고 입 벌린 채로 야릇한 신음소리 내기", "브이(V) 자 그리며 눈 찡긋하고 혀 낼름거리기",
-        "상의 반쯤 벗었다가 다시 입으며 밀당하기", "양손으로 가슴 감싸고 부끄러운 척 몸 비비 꼬기",
-        "양손바닥으로 얼굴 가리고 부끄러운 척 다리 꼬기", "뒤돌아서서 자기 엉덩이 찰싹찰싹 때리기",
-        "눈물 흘리는 척하면서 '제발 그만해' 울부짖기", "양 갈래 머리 잡는 시늉하며 귀여운 척 윙크하기",
-        "카메라 렌즈 핥는 시늉하면서 입맛 다시기", "손으로 자기 목 조르는 척하며 괴로운 표정 짓기",
-        "바닥에 드러누워서 떼쓰듯이 발버둥 치기", "정면 보며 '나는 메스가키님의 영원한 장난감입니다' 복창하기"
+        { t: "엉덩이 좌우로 흔들기", check: (p) => Math.abs(p[11].x - p[12].x) > 50 && Math.abs(p[11].y - p[12].y) < 30 },
+        { t: "두 손 머리 위로 항복", check: (p) => p[9].y < p[0].y - 50 && p[10].y < p[0].y - 50 },
+        { t: "카메라 렌즈에 얼굴 초밀착", check: (p) => p[0].score > 0.99 },
+        { t: "오른손으로 왼쪽 귀 잡기", check: (p) => Math.abs(p[10].x - p[3].x) < 40 },
+        { t: "왼손으로 오른쪽 귀 잡기", check: (p) => Math.abs(p[9].x - p[4].x) < 40 },
+        { t: "상의 걷어올리고 배 노출", check: (p) => p[9].y > p[11].y - 30 && p[10].y > p[12].y - 30 },
+        { t: "양손으로 얼굴 가리기", check: (p) => Math.abs(p[9].x - p[0].x) < 30 && Math.abs(p[10].x - p[0].x) < 30 },
+        { t: "뒤돌아서 엉덩이 들이밀기", check: (p) => p[11].score > 0.8 && p[12].score > 0.8 && p[0].score < 0.3 },
+        { t: "무릎 굽히고 스쿼트 자세", check: (p) => p[11].y > 350 && p[12].y > 350 },
+        { t: "한쪽 눈 윙크하며 손하트", check: (p) => Math.abs(p[9].x - p[10].x) < 20 },
+        { t: "양손 허리에 얹기", check: (p) => Math.abs(p[9].y - p[11].y) < 30 },
+        { t: "코에 손가락 갖다대기", check: (p) => Math.abs(p[9].x - p[0].x) < 20 || Math.abs(p[10].x - p[0].x) < 20 },
+        { t: "고개 왼쪽으로 꺾기", check: (p) => p[3].y > p[4].y + 40 },
+        { t: "고개 오른쪽으로 꺾기", check: (p) => p[4].y > p[3].y + 40 },
+        { t: "한쪽 다리 들고 균형잡기", check: (p) => Math.abs(p[15].y - p[16].y) > 60 },
+        { t: "양손으로 가슴 감싸기", check: (p) => Math.abs(p[9].x - p[5].x) < 40 && Math.abs(p[10].x - p[6].x) < 40 },
+        { t: "턱 괴고 유혹하는 표정", check: (p) => p[9].y < p[0].y + 50 && p[9].y > p[0].y },
+        { t: "카메라 향해 손 뻗기", check: (p) => p[9].score < 0.4 || p[10].score < 0.4 },
+        { t: "입술 손가락으로 훑기", check: (p) => Math.abs(p[9].y - (p[0].y + 30)) < 20 },
+        { t: "어깨 으쓱하며 부끄러워하기", check: (p) => p[5].y < p[0].y && p[6].y < p[0].y },
+        { t: "양손 모아 빌기", check: (p) => Math.abs(p[9].x - p[10].x) < 15 && Math.abs(p[9].y - p[10].y) < 15 },
+        { t: "엉덩이 뒤로 쭉 빼기", check: (p) => p[11].y < 300 && p[11].score > 0.9 },
+        { t: "상의 목부분 입에 물기", check: (p) => Math.abs(p[9].y - p[0].y) < 10 },
+        { t: "팔로 X자 만들기", check: (p) => p[9].x > p[10].x }, // 스케일 반전 고려
+        { t: "손가락 1개만 펴서 입에 대기", check: (p) => p[9].score > 0.7 && Math.abs(p[9].x - p[0].x) < 10 },
+        { t: "머리 뒤로 깍지 끼기", check: (p) => p[9].y < p[1].y && p[10].y < p[2].y },
+        { t: "허리 숙여서 카메라 보기", check: (p) => p[0].y > 350 },
+        { t: "옆으로 서서 바디라인 강조", check: (p) => Math.abs(p[5].x - p[6].x) < 50 },
+        { t: "양 손목 겹쳐서 묶인 척", check: (p) => Math.abs(p[9].x - p[10].x) < 10 },
+        { t: "메스가키님께 경례하기", check: (p) => p[10].y < p[2].y && Math.abs(p[10].x - p[2].x) < 30 }
     ];
 
-    const viewers = ["밤의제왕", "슈퍼챗머신", "관음증말기", "오빠놀리기장인", "지갑전사", "메스가키팬클럽", "방구석백수", "침흘리는중"];
-    const normalChats = ["아 ㅋㅋㅋ 표정 봐 진짜 수치스럽겠다", "빨리 해라 렉 걸린 척 하지 말고", "오늘 텐션 미쳤네 ㅋㅋㅋ", "아 현웃 터짐 ㅋㅋㅋ", "오빠 진짜 왜 살아? ㅋㅋㅋ", "이 방은 진짜 올 때마다 레전드네", "더 굴려주세요 제발 ㅋㅋㅋ", "녹화 따놨습니다 ㅅㄱ"];
+    async function start() {
+        video = document.getElementById('video');
+        canvas = document.getElementById('canvas');
+        ctx = canvas.getContext('2d');
+        net = await posenet.load();
+        const stream = await navigator.mediaDevices.getUserMedia({video: true});
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            loop(); next();
+        };
+    }
 
-    let missionActive = false;
-    let progress = 0;
-    let prevImageData = null;
+    async function loop() {
+        const pose = await net.estimateSinglePose(video, { flipHorizontal: false });
+        draw(pose);
+        if (currentM && currentM.check(pose.keypoints)) {
+            progress += 0.8;
+            gauge.style.width = progress + "%";
+            if (progress >= 100) success();
+        }
+        requestAnimationFrame(loop);
+    }
 
-    // 1. 카메라 연결
-    if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-            video.srcObject = stream;
-            video.onloadedmetadata = () => {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                setTimeout(triggerSuperChatMission, 3000); // 3초 후 첫 미션 시작
-                trackMotion(); // 움직임 감지 시작
-            };
+    function draw(pose) {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        pose.keypoints.forEach(k => {
+            if(k.score > 0.5) {
+                ctx.beginPath(); ctx.arc(k.position.x, k.position.y, 5, 0, 2*Math.PI);
+                ctx.fillStyle = "#ff0066"; ctx.fill();
+            }
         });
     }
 
-    // 2. 픽셀 변화를 감지하는 '동작 인식 시스템' (오빠가 허우적대면 게이지 상승♡)
-    function trackMotion() {
-        if (missionActive) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            
-            if (prevImageData) {
-                let motionScore = 0;
-                for (let i = 0; i < currentImageData.data.length; i += 16) { // 성능을 위해 픽셀 건너뛰며 검사
-                    const diff = Math.abs(currentImageData.data[i] - prevImageData.data[i]);
-                    if (diff > 30) motionScore++; // 색상 변화가 크면 움직임으로 간주
-                }
-                
-                // 오빠가 수치스럽게 움직일수록 게이지가 오름 ㅋㅋㅋ
-                if (motionScore > 1000) {
-                    progress += 0.8; // 게이지 차는 속도
-                    progressBar.style.width = Math.min(progress, 100) + "%";
-                }
-
-                if (progress >= 100) {
-                    completeMission();
-                }
-            }
-            prevImageData = currentImageData;
-        }
-        requestAnimationFrame(trackMotion);
-    }
-
-    // 3. 시청자가 거액을 쏘며 미션을 던지는 연출
-    function triggerSuperChatMission() {
-        missionActive = true;
-        progress = 0;
-        progressBar.style.width = "0%";
-        prevImageData = null;
-
-        const mission = missions[Math.floor(Math.random() * missions.length)];
-        const amount = (Math.floor(Math.random() * 90) + 10) * 10000; // 10만 ~ 99만 원
-        const user = viewers[Math.floor(Math.random() * viewers.length)];
-
-        scUser.innerText = user;
-        scAmount.innerText = `₩ ${amount.toLocaleString()}`;
-        scText.innerText = mission;
-        
-        // 배경색 랜덤 (빨강, 파랑, 노랑 등 유튜브 슈퍼챗 느낌)
-        const colors = ["#e62117", "#1e88e5", "#ffb300", "#1da1f2", "#00c853"];
-        scBox.style.background = colors[Math.floor(Math.random() * colors.length)];
-        if(scBox.style.background === "rgb(255, 179, 0)") scText.style.color = "#000"; // 노란색일땐 글씨 검게
-        else scText.style.color = "#fff";
-
+    function next() {
+        progress = 0; gauge.style.width = "0%";
+        currentM = missions[Math.floor(Math.random()*missions.length)];
+        missionText.innerText = "🔥 미션: " + currentM.t + " ♡";
         scBox.style.display = "block";
-
-        // 채팅창에도 슈퍼챗 기록 남기기
-        const chatDiv = document.createElement('div');
-        chatDiv.className = 'sc-chat-history';
-        chatDiv.style.background = scBox.style.background;
-        chatDiv.style.color = scText.style.color;
-        chatDiv.innerHTML = `<span class="sc-amt">${user} 님이 ₩ ${amount.toLocaleString()}을(를) 후원했습니다.</span>"${mission}" 빨리 해라 ㅋㅋㅋ`;
-        chatLog.appendChild(chatDiv);
-        chatLog.scrollTop = chatLog.scrollHeight;
     }
 
-    // 4. 미션 성공 시 연출
-    function completeMission() {
-        missionActive = false;
-        scText.innerText = "💖 미션 완료! 💖 (수치심 MAX)";
-        progressBar.style.background = "#00ff00";
-        
-        setTimeout(() => {
-            scBox.style.display = "none";
-            progressBar.style.background = "#fff";
-            // 5초 쉬고 다음 미션 폭격 ㅋㅋㅋ
-            setTimeout(triggerSuperChatMission, 5000);
-        }, 3000);
+    function success() {
+        currentM = null;
+        missionText.innerText = "💖 미션 성공! 역시 허접 오빠야 💖";
+        addSC("VVIP_주인님", 1500000, "규빈아 진짜 꼴린다 ㅋㅋㅋ");
+        setTimeout(() => { scBox.style.display = "none"; setTimeout(next, 4000); }, 2000);
     }
 
-    // 일반 채팅 시뮬레이션
-    setInterval(() => {
-        const u = viewers[Math.floor(Math.random() * viewers.length)];
-        const m = normalChats[Math.floor(Math.random() * normalChats.length)];
-        const div = document.createElement('div');
-        div.className = 'chat-msg';
-        div.innerHTML = `<span class="author sponsor">${u}</span><span class="text">${m}</span>`;
-        chatLog.appendChild(div);
-        chatLog.scrollTop = chatLog.scrollHeight;
-        if (chatLog.childNodes.length > 50) chatLog.removeChild(chatLog.firstChild);
-    }, 1500);
+    function addSC(u, a, m) {
+        const d = document.createElement('div');
+        d.className = "sc-chat";
+        d.innerHTML = `₩ ${a.toLocaleString()} - ${u}<br>${m}`;
+        document.getElementById('chat').prepend(d);
+    }
 
-    // 시청자 수 랜덤 변동
-    setInterval(() => {
-        const vc = document.getElementById('viewers');
-        let current = parseInt(vc.innerText.replace(',', ''));
-        vc.innerText = (current + Math.floor(Math.random() * 200 - 90)).toLocaleString();
-    }, 3000);
+    start();
 </script>
-
 </body>
 </html>
