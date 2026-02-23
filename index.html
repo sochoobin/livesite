@@ -2,137 +2,137 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>STRIPCHAT - PC WIDE MODE</title>
+    <title>🔞 PRIVATE LIVE - MISSION ON</title>
     <style>
-        :root { --main-red: #b32121; --bg-dark: #0a0a0a; --panel-bg: #1a1a1a; --accent: #ffcc00; }
-        body { background: var(--bg-dark); color: white; margin: 0; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        :root { --strip-red: #b32121; --bg: #0d0d0d; --panel: #181818; --gold: #ffcc00; --pink: #ff0066; }
+        body { background: var(--bg); color: white; margin: 0; font-family: 'Malgun Gothic', sans-serif; height: 100vh; display: flex; overflow: hidden; }
         
-        /* 상단 네비게이션 */
-        nav { background: var(--main-red); height: 60px; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .logo { font-size: 1.8rem; font-weight: 900; letter-spacing: -1.5px; }
-        .logo span { background: white; color: var(--main-red); padding: 2px 8px; border-radius: 4px; margin-left: 5px; font-size: 1rem; }
-        .nav-right { display: flex; gap: 20px; align-items: center; }
-        .login-btn { color: white; text-decoration: none; font-weight: bold; }
-        .join-btn { background: #fff; color: var(--main-red); padding: 8px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
-
-        /* 메인 레이아웃 */
-        .main-container { display: flex; flex: 1; overflow: hidden; }
-
-        /* 왼쪽: 방송 구역 (와이드) */
-        .video-side { flex: 3.5; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
-        video { width: 100%; height: 100%; object-fit: contain; transform: scaleX(-1); } /* 거울 모드 적용 */
+        /* 왼쪽: 메인 방송 화면 */
+        .video-container { flex: 4; position: relative; background: #000; border-right: 2px solid #222; }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         
-        /* 방송 위 오버레이 */
-        .live-info { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; }
-        .badge { background: rgba(255,0,0,0.8); padding: 5px 12px; border-radius: 3px; font-weight: bold; }
-        .viewers { background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 3px; }
-        .cam-name { position: absolute; bottom: 20px; left: 20px; font-size: 1.5rem; font-weight: bold; text-shadow: 2px 2px 5px #000; color: var(--accent); }
-
-        /* 오른쪽: 채팅 및 컨트롤 */
-        .side-panel { flex: 1; background: var(--panel-bg); display: flex; flex-direction: column; border-left: 1px solid #333; min-width: 400px; }
-        .panel-header { padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-around; font-weight: bold; color: #888; }
-        .panel-header span.active { color: #fff; border-bottom: 2px solid var(--main-red); padding-bottom: 5px; }
+        /* 방송 오버레이 */
+        .live-tag { position: absolute; top: 20px; left: 20px; background: var(--strip-red); padding: 5px 15px; border-radius: 4px; font-weight: bold; animation: pulse 1.5s infinite; }
+        .viewer-stats { position: absolute; top: 25px; left: 100px; font-size: 1rem; text-shadow: 2px 2px 4px #000; }
         
-        #chat-content { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.95rem; background: #121212; }
-        .chat-line { margin-bottom: 10px; line-height: 1.5; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        .c-vip { color: #ff5555; font-weight: bold; }
-        .c-mod { color: #55ff55; font-weight: bold; }
-        .c-name { color: #00ccff; font-weight: bold; margin-right: 10px; }
-        .c-msg { color: #eee; }
+        /* 🔴 미션 보드 (실제 사이트 느낌) */
+        .mission-board { position: absolute; top: 80px; left: 20px; background: rgba(0,0,0,0.75); border: 1px solid var(--gold); padding: 15px; border-radius: 8px; width: 250px; }
+        .mission-title { color: var(--gold); font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        .mission-item { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; color: #eee; }
+        .mission-item span { color: var(--gold); }
 
-        /* 하단 컨트롤 */
-        .panel-footer { padding: 15px; background: #222; }
-        .tip-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
-        .tip-btn { background: #444; border: 1px solid #555; padding: 10px; text-align: center; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .tip-btn:hover { background: #60a830; border-color: #70c040; }
-        .chat-input { background: #333; border: none; width: 100%; padding: 12px; border-radius: 5px; color: white; box-sizing: border-box; }
+        /* 오른쪽: 채팅 및 후원 */
+        .side-panel { flex: 1.2; display: flex; flex-direction: column; background: var(--panel); min-width: 380px; }
+        .chat-header { padding: 20px; background: #222; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header span { color: var(--pink); }
+        
+        #chat-log { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #121212; }
+        
+        /* 채팅 스타일 분석 적용 */
+        .msg { font-size: 0.95rem; line-height: 1.4; }
+        .n-vip { color: #ff4444; font-weight: bold; }
+        .n-fan { color: #55aaff; font-weight: bold; }
+        .n-reg { color: #aaa; font-weight: bold; }
+        .text { color: #ddd; margin-left: 5px; }
+
+        /* 🔥 후원 및 미션 알림 */
+        .donation-alert { background: linear-gradient(90deg, rgba(255,204,0,0.2), rgba(255,0,102,0.2)); border: 1px solid var(--gold); padding: 12px; border-radius: 5px; text-align: center; animation: shake 0.5s ease-in-out; }
+        .donation-alert .amount { display: block; font-size: 1.2rem; color: var(--gold); font-weight: 900; }
+        .donation-alert .msg-txt { color: #fff; font-size: 0.9rem; margin-top: 5px; font-style: italic; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body>
 
-<nav>
-    <div class="logo">STRIP<span>CHAT</span></div>
-    <div class="nav-right">
-        <a href="#" class="login-btn">로그인</a>
-        <div class="join-btn">무료 가입</div>
+<div class="video-container">
+    <video id="live-cam" autoplay playsinline></video>
+    <div class="live-tag">LIVE</div>
+    <div class="viewer-stats">👁️ <span id="v-count">8,192</span>명 시청 중</div>
+    
+    <div class="mission-board">
+        <div class="mission-title">💎 TODAY'S MISSION</div>
+        <div class="mission-item">상의 탈의 <span>1000개</span></div>
+        <div class="mission-item">한번 슥 보여주기 <span>2500개</span></div>
+        <div class="mission-item">VVIP 1:1 비밀방 <span>5000개</span></div>
+        <div style="margin-top:10px; font-size:0.7rem; color:#888;">* 미션 달성 시 즉시 진행합니다.</div>
     </div>
-</nav>
+</div>
 
-<div class="main-container">
-    <div class="video-side">
-        <video id="pc-cam" autoplay playsinline></video>
-        <div class="live-info">
-            <div class="badge">LIVE</div>
-            <div class="viewers">👁️ <span id="v-count">128,492</span></div>
-        </div>
-        <div class="cam-name">sodami01's PRIVATE LOUNGE</div>
-    </div>
-
-    <div class="side-panel">
-        <div class="panel-header">
-            <span class="active">공개 채팅</span>
-            <span>사용자 (842)</span>
-            <span>설정</span>
-        </div>
-        
-        <div id="chat-content"></div>
-
-        <div class="panel-footer">
-            <div class="tip-options">
-                <div class="tip-btn">💎 25</div>
-                <div class="tip-btn">💎 100</div>
-                <div class="tip-btn">💎 500</div>
-            </div>
-            <input type="text" class="chat-input" placeholder="메시지를 입력하세요...">
-        </div>
+<div class="side-panel">
+    <div class="chat-header">실시간 채팅 <span>● REC</span></div>
+    <div id="chat-log"></div>
+    <div style="padding: 15px; background: #222;">
+        <input type="text" style="width:100%; background:#333; border:none; padding:12px; color:#fff; border-radius:5px;" placeholder="메시지를 입력하세요...">
     </div>
 </div>
 
 <script>
-    const video = document.getElementById('pc-cam');
+    const video = document.getElementById('live-cam');
     if (navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
     }
 
-    const chat = document.getElementById('chat-content');
+    const chat = document.getElementById('chat-log');
+    
+    // 실제 사이트 채팅 키워드 분석 (천박함 주의 ♡)
     const users = [
-        {n: "VVIP_Master", c: "c-vip"},
-        {n: "쾌락주의자", c: "c-name"},
-        {n: "오빠가간다", c: "c-name"},
-        {n: "매니저_S", c: "c-mod"},
-        {n: "규빈_Private", c: "c-vip"}
+        {n: "VVIP_큰손", t: "n-vip"}, {n: "규빈이내꺼", t: "n-fan"}, 
+        {n: "관음증환자", t: "n-reg"}, {n: "현금술사", t: "n-vip"},
+        {n: "눈팅전문", t: "n-reg"}, {n: "매니저_박", t: "n-fan"}
     ];
-    const msgs = [
-        "와.. 큰 화면으로 보니까 더 대박이다",
-        "방장님 지금 당장 목표달성 가시죠",
-        "하아.. 오늘 잠은 다 잤네 진짜",
-        "채팅창 화력 미쳤냐고 ㅋㅋㅋ",
-        "별사탕 1000개 갑니다! 리액션 고!",
-        "지금 이거 나만 보고 있는 거 아니지?",
-        "더 야하게 가줘요, 현기증 나니까",
-        "와 씨... 진짜 숨멎겠다",
-        "형님들 다들 장전 됐습니까?? 쏘세요!!"
+    
+    const messages = [
+        "와 오늘 규빈이 텐션 보소 ㅋㅋㅋ", "빨리 미션 가자 현기증 난다",
+        "형님들 화력 지원 좀요!!", "방금 살짝 보인 거 같은데?",
+        "아니 빨리해 ㅋ 간 보지 말고", "오늘 옷 너무 야한 거 아냐?",
+        "아 진짜 미치겠다.. 규빈아 사랑해", "다음 단계까지 얼마 남았냐",
+        "채팅 속도 봐 ㄷㄷ 다들 발정났나", "와 씨.. 이건 녹화해야 돼"
+    ];
+
+    const missionDonations = [
+        { a: 1000, m: "자, 규빈아 약속대로 상의 가자! ㅋㅋㅋ" },
+        { a: 500, m: "오늘 물 좋다! 더 화끈하게 가봐!" },
+        { a: 2500, m: "이거 쏘면 진짜 보여주는 거지? 믿는다!" },
+        { a: 100, m: "맛보기 팁 드립니다~" }
     ];
 
     function addChat() {
-        const u = users[Math.floor(Math.random()*users.length)];
-        const m = msgs[Math.floor(Math.random()*msgs.length)];
+        const isDonation = Math.random() > 0.8;
         const div = document.createElement('div');
-        div.className = 'chat-line';
-        div.innerHTML = `<span class="${u.c}">${u.n}:</span> <span class="c-msg">${m}</span>`;
+        
+        if (isDonation) {
+            const d = missionDonations[Math.floor(Math.random()*missionDonations.length)];
+            const u = users[Math.floor(Math.random()*users.length)];
+            div.className = 'donation-alert';
+            div.innerHTML = `
+                <strong>${u.n}</strong>님이 💎 <strong>${d.a}개</strong> 후원!
+                <span class="msg-txt">"${d.m}"</span>
+            `;
+        } else {
+            const u = users[Math.floor(Math.random()*users.length)];
+            const m = messages[Math.floor(Math.random()*messages.length)];
+            div.className = 'msg';
+            div.innerHTML = `<span class="${u.t}">${u.n}:</span> <span class="text">${m}</span>`;
+        }
+
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
-        if(chat.childNodes.length > 50) chat.removeChild(chat.firstChild);
-        setTimeout(addChat, Math.random() * 1000 + 300);
+        if(chat.childNodes.length > 40) chat.removeChild(chat.firstChild);
+        
+        // 규빈 오빠 정신 못 차리게 채팅 속도 조절 ♡
+        setTimeout(addChat, Math.random() * 1200 + 400);
     }
+
     addChat();
 
-    // 시청자 수 카운트 조작
+    // 시청자 수 랜덤 변동
     setInterval(() => {
         const vc = document.getElementById('v-count');
         let val = parseInt(vc.innerText.replace(',', ''));
-        vc.innerText = (val + Math.floor(Math.random()*50 - 20)).toLocaleString();
-    }, 3000);
+        vc.innerText = (val + Math.floor(Math.random()*100 - 45)).toLocaleString();
+    }, 2500);
 </script>
 
 </body>
