@@ -2,148 +2,223 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>🔞 AI MISSION CONTROL - SLAVE MODE</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+    <title>허접 오빠의 수치스러운 YouTube Live</title>
     <style>
-        :root { --main: #ff0066; --bg: #050505; --gold: #ffcc00; }
-        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; overflow: hidden; display: flex; }
+        :root { --yt-bg: #0f0f0f; --yt-panel: #212121; --yt-text: #f1f1f1; --sc-red: #e62117; --sc-gold: #ffb300; --sc-blue: #1e88e5; }
+        body { background: var(--yt-bg); color: var(--yt-text); margin: 0; font-family: 'Roboto', 'Noto Sans KR', sans-serif; display: flex; height: 100vh; overflow: hidden; }
         
-        /* 왼쪽: 감시 화면 */
-        .view-side { flex: 3; position: relative; background: #000; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: contrast(1.2); }
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); pointer-events: none; }
+        /* 왼쪽: 비디오 및 슈퍼챗 오버레이 */
+        .video-section { flex: 7; position: relative; background: #000; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #333; }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        /* 유튜브 스타일 라이브 뱃지 */
+        .yt-live-badge { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .yt-live-badge .red-dot { width: 10px; height: 10px; background: red; border-radius: 50%; animation: blink 1.5s infinite; }
+        .viewer-count { position: absolute; top: 20px; left: 110px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px; color: #aaa; font-weight: bold; }
 
-        /* 🔥 AI 미션 안내창 */
-        .mission-overlay { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 80%; text-align: center; z-index: 10; }
-        #mission-text { background: rgba(255, 0, 102, 0.8); padding: 20px; border-radius: 10px; font-size: 1.8rem; font-weight: 900; border: 3px solid white; box-shadow: 0 0 30px var(--main); }
-        #progress-bar { width: 0%; height: 10px; background: var(--gold); margin-top: 10px; transition: width 0.3s; }
+        /* 🔥 시청자 슈퍼챗 강제 미션 보드 */
+        .superchat-mission { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 70%; background: var(--sc-red); border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: none; z-index: 10; animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .sc-header { background: rgba(0,0,0,0.2); padding: 15px; display: flex; align-items: center; gap: 15px; font-weight: bold; font-size: 1.2rem; }
+        .sc-header .sc-amount { color: #fff; font-size: 1.5rem; }
+        .sc-body { padding: 20px; background: var(--sc-red); font-size: 1.8rem; font-weight: 900; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        
+        /* 미션 진행도 (오빠의 수치심 게이지) */
+        .progress-container { background: rgba(0,0,0,0.5); height: 15px; width: 100%; }
+        #mission-progress { background: #fff; height: 100%; width: 0%; transition: width 0.2s; }
 
-        /* 오른쪽: 천박한 채팅창 */
-        .chat-side { flex: 1; background: #111; border-left: 2px solid #333; display: flex; flex-direction: column; min-width: 350px; }
-        #chat-log { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9rem; display: flex; flex-direction: column; gap: 10px; }
-        .donation { background: rgba(255, 204, 0, 0.15); border: 1px solid var(--gold); padding: 10px; border-radius: 5px; color: var(--gold); text-align: center; font-weight: bold; }
-        .msg { border-bottom: 1px solid #222; padding-bottom: 5px; }
-        .n { font-weight: bold; color: #ff0066; }
+        /* 오른쪽: 유튜브 스타일 실시간 채팅창 */
+        .chat-section { flex: 2.5; display: flex; flex-direction: column; background: var(--yt-bg); min-width: 350px; }
+        .chat-header { padding: 15px; font-size: 1rem; border-bottom: 1px solid #333; }
+        #chat-log { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; font-size: 0.95rem; }
+        
+        .chat-msg { display: flex; gap: 10px; line-height: 1.4; }
+        .chat-msg .author { color: #aaa; font-weight: 500; }
+        .chat-msg .text { color: var(--yt-text); }
+        .chat-msg .author.sponsor { color: #2ba640; } /* 유튜버 멤버십 색상 */
+
+        /* 채팅창 슈퍼챗 기록 */
+        .sc-chat-history { background: var(--sc-gold); color: #000; padding: 10px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; }
+        .sc-chat-history .sc-amt { font-size: 1.1rem; display: block; margin-bottom: 4px; }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes popUp { 0% { opacity: 0; transform: translate(-50%, 50px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
     </style>
 </head>
 <body>
 
-<div class="view-side">
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas"></canvas>
-    <div class="mission-overlay">
-        <div id="mission-text">AI 시스템 초기화 중...</div>
-        <div id="progress-bar"></div>
+<div class="video-section">
+    <video id="webcam" autoplay playsinline></video>
+    <div class="yt-live-badge"><div class="red-dot"></div>실시간</div>
+    <div class="viewer-count">👁 <span id="viewers">42,105</span></div>
+
+    <div class="superchat-mission" id="sc-mission-box">
+        <div class="sc-header">
+            <div style="background: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items:center; justify-content:center; color:#000; font-size:1.5rem;">👑</div>
+            <div style="flex:1;">
+                <div id="sc-user">VVIP_주인님</div>
+                <div class="sc-amount" id="sc-amount">₩ 500,000</div>
+            </div>
+        </div>
+        <div class="sc-body" id="sc-mission-text">미션 텍스트</div>
+        <div class="progress-container"><div id="mission-progress"></div></div>
     </div>
 </div>
 
-<div class="chat-side">
-    <div style="padding:15px; background:#222; font-weight:bold; color:var(--gold);">🔞 VVIP 전용 조교 채널</div>
+<div class="chat-section">
+    <div class="chat-header">주요 채팅 ▼</div>
     <div id="chat-log"></div>
+    <div style="padding: 15px; background: var(--yt-panel); border-top: 1px solid #333;">
+        <div style="background: #333; padding: 10px; border-radius: 20px; color: #888;">채팅 메시지 입력...</div>
+    </div>
 </div>
 
-<script>
-    const video = document.getElementById('video');
-    const missionTxt = document.getElementById('mission-text');
-    const chatLog = document.getElementById('chat-log');
-    const progBar = document.getElementById('progress-bar');
-    
-    let net;
-    let currentMissionIdx = 0;
-    let missionActive = false;
-    let successCount = 0;
+<canvas id="motion-canvas" style="display:none;"></canvas>
 
-    // 🔞 천박하고 자극적인 미션 리스트
+<script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('motion-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const scBox = document.getElementById('sc-mission-box');
+    const scText = document.getElementById('sc-mission-text');
+    const scAmount = document.getElementById('sc-amount');
+    const scUser = document.getElementById('sc-user');
+    const progressBar = document.getElementById('mission-progress');
+    const chatLog = document.getElementById('chat-log');
+
+    // 🔞 창의적이고 수치스러운 30가지 미션 리스트 (오빠 맞춤형♡)
     const missions = [
-        { t: "두 손 머리 위로 올리고 '항복' 포즈! ♡", type: "hands_up" },
-        { t: "엉덩이 뒤로 쭉 빼고 흔들기 준비! ♡", type: "hip_back" },
-        { t: "카메라 향해 얼굴 가까이 밀착하기! ♡", type: "face_close" },
-        { t: "한쪽 다리 들고 수치스러운 포즈 취하기! ♡", type: "one_leg" }
+        "양손으로 머리 위 하트 만들고 '난 허접이야' 외치기", "카메라 보면서 혀 내밀고 개처럼 멍멍 짖기", 
+        "입술 쭉 내밀고 모니터 화면에 뽀뽀하기", "뒤돌아서 엉덩이 화면 쪽으로 씰룩거리기", 
+        "제로투 댄스 30초 동안 요염하게 추기", "양 볼 꼬집으면서 '주인님 용서해주세요' 하기",
+        "카메라에 얼굴 완전 들이밀고 거칠게 숨쉬기", "바닥에 엎드려서 고양이 자세로 야옹~ 하기",
+        "눈 뒤집고 침 흘리는 바보 같은 표정 짓기", "옷 살짝 걷어서 배꼽 보여주면서 애교 부리기",
+        "허리 숙여서 카메라에 정수리 보여주며 싹싹 빌기", "두 손 모아 빌면서 '한 번만 봐주세요' 애원하기",
+        "겨드랑이 활짝 열고 만세하면서 수치심 느끼기", "허공에 대고 가상의 주인이랑 찐하게 포옹하기",
+        "손가락 입에 물고 촉촉한 눈빛으로 올려다보기", "무릎 꿇고 앉아서 수치스러운 자기소개 하기",
+        "손가락 하트 날리며 '오빠가 제일 사랑해' 느끼하게 말하기", "카메라 앞에서 다리 벌리고 개다리춤 추기",
+        "눈 감고 입 벌린 채로 야릇한 신음소리 내기", "브이(V) 자 그리며 눈 찡긋하고 혀 낼름거리기",
+        "상의 반쯤 벗었다가 다시 입으며 밀당하기", "양손으로 가슴 감싸고 부끄러운 척 몸 비비 꼬기",
+        "양손바닥으로 얼굴 가리고 부끄러운 척 다리 꼬기", "뒤돌아서서 자기 엉덩이 찰싹찰싹 때리기",
+        "눈물 흘리는 척하면서 '제발 그만해' 울부짖기", "양 갈래 머리 잡는 시늉하며 귀여운 척 윙크하기",
+        "카메라 렌즈 핥는 시늉하면서 입맛 다시기", "손으로 자기 목 조르는 척하며 괴로운 표정 짓기",
+        "바닥에 드러누워서 떼쓰듯이 발버둥 치기", "정면 보며 '나는 메스가키님의 영원한 장난감입니다' 복창하기"
     ];
 
-    async function setupAI() {
-        net = await posenet.load();
-        missionTxt.innerText = "규빈 오빠, 감시 시작할게♡ 첫 미션 대기해!";
-        startVideo();
-    }
+    const viewers = ["밤의제왕", "슈퍼챗머신", "관음증말기", "오빠놀리기장인", "지갑전사", "메스가키팬클럽", "방구석백수", "침흘리는중"];
+    const normalChats = ["아 ㅋㅋㅋ 표정 봐 진짜 수치스럽겠다", "빨리 해라 렉 걸린 척 하지 말고", "오늘 텐션 미쳤네 ㅋㅋㅋ", "아 현웃 터짐 ㅋㅋㅋ", "오빠 진짜 왜 살아? ㅋㅋㅋ", "이 방은 진짜 올 때마다 레전드네", "더 굴려주세요 제발 ㅋㅋㅋ", "녹화 따놨습니다 ㅅㄱ"];
 
-    function startVideo() {
-        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-            video.srcObject = s;
-            video.onloadedmetadata = () => { detectPose(); setTimeout(nextMission, 3000); };
+    let missionActive = false;
+    let progress = 0;
+    let prevImageData = null;
+
+    // 1. 카메라 연결
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                setTimeout(triggerSuperChatMission, 3000); // 3초 후 첫 미션 시작
+                trackMotion(); // 움직임 감지 시작
+            };
         });
     }
 
-    async function detectPose() {
-        const pose = await net.estimateSinglePose(video);
-        checkMission(pose);
-        requestAnimationFrame(detectPose);
+    // 2. 픽셀 변화를 감지하는 '동작 인식 시스템' (오빠가 허우적대면 게이지 상승♡)
+    function trackMotion() {
+        if (missionActive) {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            if (prevImageData) {
+                let motionScore = 0;
+                for (let i = 0; i < currentImageData.data.length; i += 16) { // 성능을 위해 픽셀 건너뛰며 검사
+                    const diff = Math.abs(currentImageData.data[i] - prevImageData.data[i]);
+                    if (diff > 30) motionScore++; // 색상 변화가 크면 움직임으로 간주
+                }
+                
+                // 오빠가 수치스럽게 움직일수록 게이지가 오름 ㅋㅋㅋ
+                if (motionScore > 1000) {
+                    progress += 0.8; // 게이지 차는 속도
+                    progressBar.style.width = Math.min(progress, 100) + "%";
+                }
+
+                if (progress >= 100) {
+                    completeMission();
+                }
+            }
+            prevImageData = currentImageData;
+        }
+        requestAnimationFrame(trackMotion);
     }
 
-    function checkMission(pose) {
-        if (!missionActive) return;
-
-        const leftWrist = pose.keypoints[9].position;
-        const rightWrist = pose.keypoints[10].position;
-        const nose = pose.keypoints[0].position;
-
-        // 미션 판별 로직 (매우 단순화된 예시야, 허접 오빠♡)
-        if (missions[currentMissionIdx].type === "hands_up") {
-            if (leftWrist.y < 200 && rightWrist.y < 200) successCount++;
-        } else if (missions[currentMissionIdx].type === "face_close") {
-            // 코가 화면에서 크게 감지되면 (대충 y 좌표나 거리로 계산)
-            if (pose.score > 0.9) successCount++;
-        }
-
-        progBar.style.width = (successCount % 100) + "%";
-
-        if (successCount >= 100) {
-            completeMission();
-        }
-    }
-
-    function nextMission() {
-        successCount = 0;
+    // 3. 시청자가 거액을 쏘며 미션을 던지는 연출
+    function triggerSuperChatMission() {
         missionActive = true;
-        missionTxt.innerText = "🔥 MISSION: " + missions[currentMissionIdx].t;
-        addChat("SYSTEM", "새로운 미션이 시작되었습니다. 빨리 안 해??", "n");
+        progress = 0;
+        progressBar.style.width = "0%";
+        prevImageData = null;
+
+        const mission = missions[Math.floor(Math.random() * missions.length)];
+        const amount = (Math.floor(Math.random() * 90) + 10) * 10000; // 10만 ~ 99만 원
+        const user = viewers[Math.floor(Math.random() * viewers.length)];
+
+        scUser.innerText = user;
+        scAmount.innerText = `₩ ${amount.toLocaleString()}`;
+        scText.innerText = mission;
+        
+        // 배경색 랜덤 (빨강, 파랑, 노랑 등 유튜브 슈퍼챗 느낌)
+        const colors = ["#e62117", "#1e88e5", "#ffb300", "#1da1f2", "#00c853"];
+        scBox.style.background = colors[Math.floor(Math.random() * colors.length)];
+        if(scBox.style.background === "rgb(255, 179, 0)") scText.style.color = "#000"; // 노란색일땐 글씨 검게
+        else scText.style.color = "#fff";
+
+        scBox.style.display = "block";
+
+        // 채팅창에도 슈퍼챗 기록 남기기
+        const chatDiv = document.createElement('div');
+        chatDiv.className = 'sc-chat-history';
+        chatDiv.style.background = scBox.style.background;
+        chatDiv.style.color = scText.style.color;
+        chatDiv.innerHTML = `<span class="sc-amt">${user} 님이 ₩ ${amount.toLocaleString()}을(를) 후원했습니다.</span>"${mission}" 빨리 해라 ㅋㅋㅋ`;
+        chatLog.appendChild(chatDiv);
+        chatLog.scrollTop = chatLog.scrollHeight;
     }
 
+    // 4. 미션 성공 시 연출
     function completeMission() {
         missionActive = false;
-        missionTxt.innerText = "💖 MISSION COMPLETE! 💖";
-        const amount = Math.floor(Math.random() * 500000) + 100000;
-        addDonation("VIP_큰손", amount, "와 규빈아 진짜 꼴린다! 더 해봐!! ㅋㅋㅋ");
+        scText.innerText = "💖 미션 완료! 💖 (수치심 MAX)";
+        progressBar.style.background = "#00ff00";
         
-        currentMissionIdx = (currentMissionIdx + 1) % missions.length;
-        setTimeout(nextMission, 4000);
+        setTimeout(() => {
+            scBox.style.display = "none";
+            progressBar.style.background = "#fff";
+            // 5초 쉬고 다음 미션 폭격 ㅋㅋㅋ
+            setTimeout(triggerSuperChatMission, 5000);
+        }, 3000);
     }
 
-    function addChat(nick, msg, cls) {
-        const d = document.createElement('div');
-        d.className = 'msg';
-        d.innerHTML = `<span class="${cls}">${nick}:</span> <span>${msg}</span>`;
-        chatLog.appendChild(d);
-        chatLog.scrollTop = chatLog.scrollHeight;
-    }
-
-    function addDonation(nick, amount, msg) {
-        const d = document.createElement('div');
-        d.className = 'donation';
-        d.innerHTML = `💰 ${nick}님이 ${amount.toLocaleString()}원 후원!<br>"${msg}"`;
-        chatLog.appendChild(d);
-        chatLog.scrollTop = chatLog.scrollHeight;
-    }
-
-    // 천박한 실시간 채팅 시뮬레이션
+    // 일반 채팅 시뮬레이션
     setInterval(() => {
-        const nicks = ["변태추적자", "밤의황제", "규빈노예", "침질질"];
-        const texts = ["와 저 포즈 진짜 천박하다 ㅋㅋㅋ", "더 해봐!! 더!!", "돈 쏠 테니까 옷 좀 내려봐", "아헤가오 가즈아ㅏㅏ"];
-        addChat(nicks[Math.floor(Math.random()*nicks.length)], texts[Math.floor(Math.random()*texts.length)], "n");
-    }, 2000);
+        const u = viewers[Math.floor(Math.random() * viewers.length)];
+        const m = normalChats[Math.floor(Math.random() * normalChats.length)];
+        const div = document.createElement('div');
+        div.className = 'chat-msg';
+        div.innerHTML = `<span class="author sponsor">${u}</span><span class="text">${m}</span>`;
+        chatLog.appendChild(div);
+        chatLog.scrollTop = chatLog.scrollHeight;
+        if (chatLog.childNodes.length > 50) chatLog.removeChild(chatLog.firstChild);
+    }, 1500);
 
-    setupAI();
+    // 시청자 수 랜덤 변동
+    setInterval(() => {
+        const vc = document.getElementById('viewers');
+        let current = parseInt(vc.innerText.replace(',', ''));
+        vc.innerText = (current + Math.floor(Math.random() * 200 - 90)).toLocaleString();
+    }, 3000);
 </script>
+
 </body>
 </html>
