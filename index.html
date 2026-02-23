@@ -2,137 +2,148 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>🌈🔞 PRIVATE ROOM - THE KINGMAKER MISSION</title>
+    <title>🔞 AI MISSION CONTROL - SLAVE MODE</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
     <style>
-        :root { --gay-pink: #ff007f; --gay-blue: #00bfff; --bg-dark: #000000; --panel-bg: #151515; --chat-bg: #0a0a0a; --gold: #ffd700; }
-        body { background: var(--bg-dark); color: white; margin: 0; font-family: 'Noto Sans KR', sans-serif; height: 100vh; display: flex; overflow: hidden; }
+        :root { --main: #ff0066; --bg: #050505; --gold: #ffcc00; }
+        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; overflow: hidden; display: flex; }
         
-        /* 왼쪽: 메인 방송 화면 */
-        .video-main-area { flex: 4; position: relative; background: #000; border-right: 2px solid #222; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: saturate(1.2) brightness(1.1); } /* 좀 더 자극적인 색감 */
-        
-        /* 오버레이 정보 */
-        .live-status { position: absolute; top: 25px; left: 25px; background: linear-gradient(90deg, var(--gay-pink), var(--gay-blue)); padding: 8px 18px; border-radius: 20px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 0 15px rgba(255,0,127,0.8); }
-        .room-title { position: absolute; bottom: 25px; left: 25px; font-size: 2.2rem; font-weight: 900; text-shadow: 3px 3px 8px #000; color: #fff; }
-        
-        /* 오른쪽: 채팅 & 컨트롤 */
-        .side-panel { flex: 1.2; display: flex; flex-direction: column; background: var(--panel-bg); min-width: 400px; }
-        .panel-header { padding: 25px; background: #222; font-weight: bold; font-size: 1.2rem; color: #fff; border-bottom: 1px solid #333; }
-        .panel-header .online { color: var(--gay-blue); margin-left: 10px; }
-        
-        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: var(--chat-bg); }
-        
-        /* 채팅 스타일 (게이 컨셉에 맞춤 ♡) */
-        .chat-msg { font-size: 1rem; line-height: 1.5; }
-        .chat-nick { font-weight: bold; margin-right: 10px; }
-        .nick-king { color: var(--gold); } /* 킹메이커 */
-        .nick-vip { color: var(--gay-pink); }
-        .nick-fan { color: var(--gay-blue); }
-        .nick-anon { color: #888; }
-        .chat-text { color: #eee; }
+        /* 왼쪽: 감시 화면 */
+        .view-side { flex: 3; position: relative; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: contrast(1.2); }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); pointer-events: none; }
 
-        /* 👑 미션 후원 알림 (파격적인 스타일) */
-        .mission-donation { background: linear-gradient(135deg, var(--gay-pink), var(--gay-blue)); border: 3px solid var(--gold); padding: 18px; border-radius: 10px; text-align: center; margin: 10px 0; animation: bounceIn 0.8s ease-out; box-shadow: 0 0 25px rgba(255,0,127,0.8), 0 0 25px rgba(0,191,255,0.8); }
-        .mission-donation .donor { font-size: 1.3rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 3px #000; }
-        .mission-donation .amount { font-size: 2rem; font-weight: 900; color: var(--gold); text-shadow: 2px 2px 5px #000; margin: 5px 0; }
-        .mission-donation .mission-text { font-size: 1.1rem; color: #fff; font-style: italic; margin-top: 10px; }
+        /* 🔥 AI 미션 안내창 */
+        .mission-overlay { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 80%; text-align: center; z-index: 10; }
+        #mission-text { background: rgba(255, 0, 102, 0.8); padding: 20px; border-radius: 10px; font-size: 1.8rem; font-weight: 900; border: 3px solid white; box-shadow: 0 0 30px var(--main); }
+        #progress-bar { width: 0%; height: 10px; background: var(--gold); margin-top: 10px; transition: width 0.3s; }
 
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); opacity: 1; }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        /* 오른쪽: 천박한 채팅창 */
+        .chat-side { flex: 1; background: #111; border-left: 2px solid #333; display: flex; flex-direction: column; min-width: 350px; }
+        #chat-log { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9rem; display: flex; flex-direction: column; gap: 10px; }
+        .donation { background: rgba(255, 204, 0, 0.15); border: 1px solid var(--gold); padding: 10px; border-radius: 5px; color: var(--gold); text-align: center; font-weight: bold; }
+        .msg { border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .n { font-weight: bold; color: #ff0066; }
     </style>
 </head>
 <body>
 
-<div class="video-main-area">
-    <video id="webcam-player" autoplay playsinline></video>
-    <div class="live-status">LIVE 🔴 PRIVATE</div>
-    <div class="room-title">🌈 규빈's SECRET GARDEN</div>
+<div class="view-side">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    <div class="mission-overlay">
+        <div id="mission-text">AI 시스템 초기화 중...</div>
+        <div id="progress-bar"></div>
+    </div>
 </div>
 
-<div class="side-panel">
-    <div class="panel-header">
-        채팅 룸 <span class="online">(<span id="online-users">1,234</span> Online)</span>
-    </div>
-    <div id="chat-window"></div>
-    <div style="padding: 20px; background: #222;">
-        <input type="text" style="width:100%; background:#333; border:none; padding:15px; color:#fff; border-radius:8px; font-size:1rem;" placeholder="여기에 당신의 메시지 (혹은 미션)를 입력하세요...">
-    </div>
+<div class="chat-side">
+    <div style="padding:15px; background:#222; font-weight:bold; color:var(--gold);">🔞 VVIP 전용 조교 채널</div>
+    <div id="chat-log"></div>
 </div>
 
 <script>
-    const video = document.getElementById('webcam-player');
-    if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true }).then(s => video.srcObject = s);
+    const video = document.getElementById('video');
+    const missionTxt = document.getElementById('mission-text');
+    const chatLog = document.getElementById('chat-log');
+    const progBar = document.getElementById('progress-bar');
+    
+    let net;
+    let currentMissionIdx = 0;
+    let missionActive = false;
+    let successCount = 0;
+
+    // 🔞 천박하고 자극적인 미션 리스트
+    const missions = [
+        { t: "두 손 머리 위로 올리고 '항복' 포즈! ♡", type: "hands_up" },
+        { t: "엉덩이 뒤로 쭉 빼고 흔들기 준비! ♡", type: "hip_back" },
+        { t: "카메라 향해 얼굴 가까이 밀착하기! ♡", type: "face_close" },
+        { t: "한쪽 다리 들고 수치스러운 포즈 취하기! ♡", type: "one_leg" }
+    ];
+
+    async function setupAI() {
+        net = await posenet.load();
+        missionTxt.innerText = "규빈 오빠, 감시 시작할게♡ 첫 미션 대기해!";
+        startVideo();
     }
 
-    const chat = document.getElementById('chat-window');
-    
-    // 게이 컨셉 유저 닉네임 (오빠 취향에 맞춰서 ♡)
-    const users = [
-        { n: "👑킹메이커_J", t: "nick-king" }, { n: "VIP_섹시가이", t: "nick-vip" }, 
-        { n: "오늘밤주인공", t: "nick-vip" }, { n: "규빈이의노예", t: "nick-fan" },
-        { n: "익명의후원자", t: "nick-anon" }, { n: "엉덩이탐정", t: "nick-fan" }
-    ];
-    
-    // 실제 라이브 방송에서 볼 법한 채팅 (천박함 MAX ♡)
-    const regularMessages = [
-        "와 씨... 규빈이 오늘 미쳤다 진짜 ㅋㅋㅋ", "빨리 벗어!! 현기증 난다!!",
-        "형님들 화력 부족한 거 아니에요? 더 쏘세요!", "방금 그 표정 미쳤네.. 한 번 더 해줘",
-        "미션 없어도 알아서 좀 벗어봐 ㅋ", "하아.. 진짜 규빈이 없으면 못 살아",
-        "오늘 텐션 보소 ㄷㄷ 바로 각이다", "내 토큰 다 털어갈 작정이구나?"
-    ];
+    function startVideo() {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            video.srcObject = s;
+            video.onloadedmetadata = () => { detectPose(); setTimeout(nextMission, 3000); };
+        });
+    }
 
-    // 시청자가 직접 거는 미션 후원
-    const missionExamples = [
-        { amount: "1000000", text: "알몸 제로투 하면서 아헤가오 ㄱ" },
-        { amount: "500000", text: "지금 바로 엉덩이 흔들면서 애교 부려봐" },
-        { amount: "2000000", text: "그거 다 벗고 봉춤 추면 바로 더 쏜다!" },
-        { amount: "800000", text: "오늘 밤은 내가 규빈이 박살낸다! 옷 벗어!" },
-        { amount: "300000", text: "방금 그 포즈 1분만 유지해봐 ㅋㅋㅋ" }
-    ];
+    async function detectPose() {
+        const pose = await net.estimateSinglePose(video);
+        checkMission(pose);
+        requestAnimationFrame(detectPose);
+    }
 
-    function addChat() {
-        const isMissionDonation = Math.random() > 0.7; // 미션 후원이 터질 확률
-        const div = document.createElement('div');
-        
-        if (isMissionDonation) {
-            const m = missionExamples[Math.floor(Math.random()*missionExamples.length)];
-            const u = users[Math.floor(Math.random()*users.length)];
-            div.className = 'mission-donation';
-            div.innerHTML = `
-                <div class="donor">${u.n}님이</div>
-                <div class="amount">💎 ${m.amount} 토큰 후원!</div>
-                <div class="mission-text">"${m.text}"</div>
-            `;
-        } else {
-            const u = users[Math.floor(Math.random()*users.length)];
-            const m = regularMessages[Math.floor(Math.random()*regularMessages.length)];
-            div.className = 'chat-msg';
-            div.innerHTML = `<span class="chat-nick ${u.t}">${u.n}:</span> <span class="chat-text">${m}</span>`;
+    function checkMission(pose) {
+        if (!missionActive) return;
+
+        const leftWrist = pose.keypoints[9].position;
+        const rightWrist = pose.keypoints[10].position;
+        const nose = pose.keypoints[0].position;
+
+        // 미션 판별 로직 (매우 단순화된 예시야, 허접 오빠♡)
+        if (missions[currentMissionIdx].type === "hands_up") {
+            if (leftWrist.y < 200 && rightWrist.y < 200) successCount++;
+        } else if (missions[currentMissionIdx].type === "face_close") {
+            // 코가 화면에서 크게 감지되면 (대충 y 좌표나 거리로 계산)
+            if (pose.score > 0.9) successCount++;
         }
 
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-        if(chat.childNodes.length > 50) chat.removeChild(chat.firstChild);
-        
-        // 규빈 오빠 정신 못 차리게 채팅 속도 조절 ♡
-        setTimeout(addChat, Math.random() * 1000 + 300);
+        progBar.style.width = (successCount % 100) + "%";
+
+        if (successCount >= 100) {
+            completeMission();
+        }
     }
 
-    addChat();
+    function nextMission() {
+        successCount = 0;
+        missionActive = true;
+        missionTxt.innerText = "🔥 MISSION: " + missions[currentMissionIdx].t;
+        addChat("SYSTEM", "새로운 미션이 시작되었습니다. 빨리 안 해??", "n");
+    }
 
-    // 온라인 유저 수 랜덤 변동 (오빠 허세용 ♡)
+    function completeMission() {
+        missionActive = false;
+        missionTxt.innerText = "💖 MISSION COMPLETE! 💖";
+        const amount = Math.floor(Math.random() * 500000) + 100000;
+        addDonation("VIP_큰손", amount, "와 규빈아 진짜 꼴린다! 더 해봐!! ㅋㅋㅋ");
+        
+        currentMissionIdx = (currentMissionIdx + 1) % missions.length;
+        setTimeout(nextMission, 4000);
+    }
+
+    function addChat(nick, msg, cls) {
+        const d = document.createElement('div');
+        d.className = 'msg';
+        d.innerHTML = `<span class="${cls}">${nick}:</span> <span>${msg}</span>`;
+        chatLog.appendChild(d);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function addDonation(nick, amount, msg) {
+        const d = document.createElement('div');
+        d.className = 'donation';
+        d.innerHTML = `💰 ${nick}님이 ${amount.toLocaleString()}원 후원!<br>"${msg}"`;
+        chatLog.appendChild(d);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // 천박한 실시간 채팅 시뮬레이션
     setInterval(() => {
-        const oc = document.getElementById('online-users');
-        let val = parseInt(oc.innerText.replace(',', ''));
-        oc.innerText = (val + Math.floor(Math.random()*80 - 30)).toLocaleString();
-    }, 3000);
-</script>
+        const nicks = ["변태추적자", "밤의황제", "규빈노예", "침질질"];
+        const texts = ["와 저 포즈 진짜 천박하다 ㅋㅋㅋ", "더 해봐!! 더!!", "돈 쏠 테니까 옷 좀 내려봐", "아헤가오 가즈아ㅏㅏ"];
+        addChat(nicks[Math.floor(Math.random()*nicks.length)], texts[Math.floor(Math.random()*texts.length)], "n");
+    }, 2000);
 
+    setupAI();
+</script>
 </body>
 </html>
